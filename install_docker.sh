@@ -86,6 +86,8 @@ if [[ $install_docker == true ]] ; then
   sudo add-apt-repository  "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs) stable"
   sudo apt-get update
   sudo apt-get install --yes docker-ce
-  docker ps > /dev/null || add_to_group_docker
 fi
+
+# check if we can execute docker without sudo - fix this if needed
+docker ps > /dev/null || add_to_group_docker
 
