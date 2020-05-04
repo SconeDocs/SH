@@ -20,7 +20,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE T
 OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE 
 WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-Copyright (C) 2017-2018 scontain.com
+Copyright (C) 2017-2020 scontain.com
 '
 
 set -e
@@ -67,6 +67,16 @@ function issue_error_exit_message {
     fi
     exit $errcode
 }
+
+# ensure that we do not need sudo to run docker commands
+function add_to_group_docker {
+  sudo groupadd docker 2> /dev/null || echo "NOTE: Group docker already exists"
+  sudo gpasswd -a $USER docker ||  echo "NOTE: User $USER  already member of group docker"
+  echo "NOTE: Restarting docker now - this may take a little while."
+  sudo service docker restart || echo "Error failed to restart docker service"
+  echo "Echo you might need to log out and log in again for being able to access docker without sudo"
+}
+
 trap issue_error_exit_message EXIT
 
 docker -v || install_docker=true
@@ -76,4 +86,6 @@ if [[ $install_docker == true ]] ; then
   sudo add-apt-repository  "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs) stable"
   sudo apt-get update
   sudo apt-get install --yes docker-ce
+  docker ps > /dev/null || add_to_group_docker
 fi
+
